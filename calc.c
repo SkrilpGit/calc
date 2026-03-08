@@ -30,46 +30,101 @@ bool isOperation(char c){
         case '%':
             return true;
             break;
-        case '^':
-            return true;
-            break;
         default:
             return false;
             break;
     }
 }
 
-int main(){
-    int ans = 0;
-    int size = 8;
-    char item[size];
-    bool operation = false;
-    int c;
-    c = getchar();
-    while(c != '\n'){
-        int i = 0;
-        while(c != isOperation(c) && c != '\n'){
-            if (i > size){
-               memmove(item, item, size + 4);
-               size += 4;
+int evaluate(int ans,char operator,char* input){
+    /*
+    printf("ans: %d, operator: %c, input: ",ans,operator);
+    int k = 0;
+    while (input[k] != 0)
+        printf("%c", input[k++]);
+    */
+    int i = 0;
+    int operand = 0;
+    if (input[0] == '\n')
+        return ans;
+
+    while (!isOperation(input[i]) && input[i] != '\n'){
+        if (operator == 0){
+            if (i == 0){
+                ans = 0;
+                ans += input[i] - 48;
             }
-            if (c == ' ')
-                continue;
-            item[i] = c - 48;
-            i++;
-            c = getchar();
+            else{
+            ans *= 10;
+            ans += input[i] - 48;
+            }
         }
-        if (c == isOperation(c))
-            operation = true;
-       for (int k = 0; k <= i; k++){
-           if (item[k] < 0 || item[k] > 9){
-               printf("Invalid character, not an int or operation: %c", c + 48);
-               return 0;
-           }
-           ans *= k;
-           ans += item[k];
-       }
+        else{
+            operand *= 10;
+            operand += input[i] - 48;
+        }
+        i++;
     }
-    printf("Hello Calc\n");
+    if (operator != 0 && input[0] == '\n')
+        return ans;
+    else {
+        switch (operator){
+            case '+':
+                ans += operand;
+                break;
+            case '-':
+                ans -= operand;
+                break;
+            case '*':
+                ans *= operand;
+                break;
+            case '/':
+                ans /= operand;
+                break;
+            case '%':
+                ans %= operand;
+                break;
+            default:
+                break;
+        }
+        if (isOperation(input[i])){
+            operator = input[i];
+            i += 1;
+        }
+        int s = 0;
+        while (input[s] != 0)
+            s++;
+        memmove(input, input + i, s*sizeof(char)-i);
+        evaluate(ans,operator,input);
+    }
+}
+
+bool quit(char* input){
+    return (input[0] == 'q' || input[0] == 'Q');
+}
+
+bool parse(int ans){
+    char input[32];
+    int i = 0;
+    int c;
+    printf("input: ");
+    while ((c = getchar()) != '\n' && i < 31) {
+        if ((char)c == ' ')
+            continue;
+        else
+        input[i++] = (char)c;
+    }
+    if (quit(input))
+        return false;
+    input[i] = '\n';
+    ans = evaluate(ans, 0, input);
+    printf("ans: %d\n", ans);
+    parse(ans);
+}
+
+int main(){
+
+    parse(0);
+
     return 1;
 }
